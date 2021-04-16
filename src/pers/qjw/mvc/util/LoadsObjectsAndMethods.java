@@ -1,6 +1,5 @@
 package pers.qjw.mvc.util;
 
-import pers.qjw.mvc.BeanManagement;
 import pers.qjw.mvc.annotations.GetMapping;
 import pers.qjw.mvc.annotations.RequestMapping;
 import pers.qjw.mvc.annotations.RestController;
@@ -51,9 +50,11 @@ public class LoadsObjectsAndMethods {
 
     // 通过反射得到文件的 controller类对象 和 处理请求的方法 和 uri
     private void loadObjectsAndMethod(File file) {
-
         UriAndMethodsMapping uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
-
+        if (Objects.isNull(uriAndMethodsMapping)) {
+            BeanManagement.addBean("uriAndMethodsMapping", new UriAndMethodsMapping());
+            uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
+        }
         // 检查文件是否已.class为后缀
         if (!checkFile(file)) {
             return;
@@ -86,17 +87,34 @@ public class LoadsObjectsAndMethods {
                     } else if (!Objects.isNull(getMapping)) {
                         // 处理 GET 请求方式的方法
                         requestWay = "GET";
-                        uri = uriPrefix + getMapping.value();
+                        String uriBody = getMapping.value();
+                        if (!Objects.equals("", uriBody) && !uriBody.contains("/")) {
+                            uri = uriPrefix + "/" + uriBody;
+                        } else {
+                            uri = uriPrefix + uriBody;
+                        }
                     } else {
                         // 处理 ALL 请求方式的方法
                         requestWay = "All";
                         uri = uriPrefix + requestMapping.value();
                     }
+                    Parameter[] parameters = temp.getParameters();
+                    String[] parameterNames;
+                    if (!Objects.isNull(parameters) && parameters.length != 0) {
+                        parameterNames = new String[parameters.length];
+                        for (int i = 0; i < parameters.length; i++) {
+                            parameterNames[i] = parameters[i].getName();
+                        }
+                    } else {
+                        parameterNames = null;
+                    }
                     uriAndMethodsMapping.addMapping(
                             uri
                             , requestWay
                             , temp
-                            , obj);
+                            , obj
+                            , parameterNames
+                    );
 
                 }
             }
@@ -144,27 +162,28 @@ public class LoadsObjectsAndMethods {
         return name.contains(".class");
     }
 
+    // 遍历所有文件
+    private void func(File file) {
+        File[] fs = file.listFiles();
+        if (Objects.isNull(fs) || fs.length == 0) {
+            throw new IllegalArgumentException("xml文件里配置的包名下没有找到任何类对象:" + packagePath);
+        }
+        for (File f : fs) {
+            if (f.isDirectory())
+                func(f);
+            if (f.isFile()) {
+                // 载入
+                loadObjectsAndMethod(f);
+            }
+        }
+    }
+
     // 加载所有 controller类对象 和 处理请求的方法
     public void loadsObjectsAndMethods() {
         // 获取包的绝对路径
         String path = getAbsolutePath();
         // 遍历所有文件
-        File file = new File(path);
-        File[] files = file.listFiles();
-        if (Objects.isNull(files) || files.length == 0) {
-            throw new IllegalArgumentException("xml文件里配置的包名下没有找到任何类对象:" + packagePath);
-        }
-        for (File temp :
-                files) {
-            // 目录要和文件分开处理
-            if (temp.isDirectory()) {
-                // 先处理目录
-                System.out.println(temp.getName());
-            } else {
-                // 后处理文件
-                loadObjectsAndMethod(temp);
-            }
-        }
+        func(new File(path));
     }
 
 }

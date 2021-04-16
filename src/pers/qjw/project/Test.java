@@ -9,9 +9,8 @@ import pers.qjw.mvc.annotations.RestController;
 public class Test {
 
     @GetMapping
-    public String test(){
-        System.out.println("分发成功！");
-        return "test";
+    public String test(String test,String testTwo){
+        return test + "," + testTwo;
     }
 
 }

@@ -6,10 +6,10 @@ import pers.qjw.mvc.annotations.RequestMapping;
 import pers.qjw.mvc.annotations.RestController;
 
 @RestController
-@RequestMapping("/hello")
+@RequestMapping("hello")
 public class HelloController {
 
-    @GetMapping("/{name}")
+    @GetMapping("{name}")
     public String hello(@PathVariable String name){
         return "hello " + name;
     }

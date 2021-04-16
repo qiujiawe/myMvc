@@ -1,8 +1,7 @@
-package pers.qjw.mvc;
+package pers.qjw.mvc.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class BeanManagement {
 
@@ -13,12 +12,8 @@ public class BeanManagement {
     }
 
     public static <T>T getBean(String name){
-        Object obj = beans.get(name);
-        if (Objects.isNull(obj)) {
-
-        }
-
-        return (T) obj;
+        return (T) beans.get(name);
 
     }
+
 }

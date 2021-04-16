@@ -1,55 +1,51 @@
 package pers.qjw.mvc;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import pers.qjw.mvc.bean.UriAndMethodsMapping;
-import pers.qjw.mvc.domain.MethodExecutionResources;
+import pers.qjw.mvc.util.BeanManagement;
 import pers.qjw.mvc.util.LoadsObjectsAndMethods;
+import pers.qjw.mvc.util.MethodCall;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class DistributionController extends HttpServlet {
 
     @Override
-    public void init() throws ServletException {
+    public void init(){
         // 从配置文件中读取 要扫描的包
         String packagePath = super.getInitParameter("packagePath");
-
         // 加载所有 uri 和 方法 的映射关系
+        BeanManagement.addBean("loadsObjectsAndMethods",new LoadsObjectsAndMethods(packagePath));
         LoadsObjectsAndMethods loadsObjectsAndMethods = BeanManagement.getBean("loadsObjectsAndMethods");
-
         loadsObjectsAndMethods.loadsObjectsAndMethods();
     }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UriAndMethodsMapping uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
-
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("content-type","text/html;charset=UTF-8");
+        // 获取资源地址
         String uri = req.getRequestURI();
-
-        Set<MethodExecutionResources> set = uriAndMethodsMapping.getObjAndMeth(uri);
-
+        // 获取 资源地址 的请求方式
         String requestWay = req.getMethod();
-
-        for (MethodExecutionResources temp:
-             set) {
-            System.out.println(temp);
-            String methodRequestWay = temp.getRequestWay();
-            if (Objects.equals(methodRequestWay,"ALL") || Objects.equals(requestWay,methodRequestWay)) {
-                Object obj = temp.getObj();
-                Method meth = temp.getMeth();
-                try {
-                    meth.invoke(obj);
-                } catch (IllegalAccessException | InvocationTargetException ignored) {}
-            }
+        // 获取所有参数
+        Enumeration<String> names = req.getParameterNames();
+        Iterator<String> iterator = names.asIterator();
+        List<String> keys = new ArrayList<>();
+        while (iterator.hasNext()) {
+            keys.add(iterator.next());
         }
-
+        Map<String,String> parameters = new HashMap<>();
+        for (String key:
+             keys) {
+            parameters.put(key,req.getParameter(key));
+        }
+        // 调用方法
+        Object obj = MethodCall.methodCall(uri,requestWay,parameters);
+        resp.getWriter().println(obj);
     }
 
 }

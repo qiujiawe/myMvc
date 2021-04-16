@@ -1,22 +1,23 @@
 package pers.qjw.mvc.domain;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class MethodExecutionResources {
 
     private final Object obj;
     private final Method meth;
     private final String requestWay;
-    private final Object[] parameters;
+    private final String[] parameters;
 
-    public MethodExecutionResources(Object obj, Method meth, String requestWay, Object[] parameters) {
+    public MethodExecutionResources(Object obj, Method meth, String requestWay, String[] parameters) {
         this.obj = obj;
         this.meth = meth;
         this.requestWay = requestWay;
         this.parameters = parameters;
     }
 
-    public Object[] getParameters(){
+    public String[] getParameters(){
         return parameters;
     }
 
@@ -34,10 +35,11 @@ public class MethodExecutionResources {
 
     @Override
     public String toString() {
-        return "ObjAndMeth{" +
+        return "MethodExecutionResources{" +
                 "obj=" + obj +
                 ", meth=" + meth +
                 ", requestWay='" + requestWay + '\'' +
+                ", parameters=" + Arrays.toString(parameters) +
                 '}';
     }
 }
