@@ -1,7 +1,6 @@
 package pers.qjw.mvc.domain;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 public class MethodExecutionResources {
 
@@ -33,13 +32,4 @@ public class MethodExecutionResources {
         return meth;
     }
 
-    @Override
-    public String toString() {
-        return "MethodExecutionResources{" +
-                "obj=" + obj +
-                ", meth=" + meth +
-                ", requestWay='" + requestWay + '\'' +
-                ", parameters=" + Arrays.toString(parameters) +
-                '}';
-    }
 }

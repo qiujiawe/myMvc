@@ -11,9 +11,8 @@ public class BeanManagement {
         beans.put(key,value);
     }
 
-    public static <T>T getBean(String name){
-        return (T) beans.get(name);
-
+    public static Object getBean(String name){
+        return beans.get(name);
     }
 
 }

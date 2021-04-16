@@ -17,8 +17,11 @@ public class DistributionController extends HttpServlet {
         // 从配置文件中读取 要扫描的包
         String packagePath = super.getInitParameter("packagePath");
         // 加载所有 uri 和 方法 的映射关系
-        BeanManagement.addBean("loadsObjectsAndMethods",new LoadsObjectsAndMethods(packagePath));
-        LoadsObjectsAndMethods loadsObjectsAndMethods = BeanManagement.getBean("loadsObjectsAndMethods");
+        LoadsObjectsAndMethods loadsObjectsAndMethods = (LoadsObjectsAndMethods) BeanManagement.getBean("loadsObjectsAndMethods");
+        if (Objects.isNull(loadsObjectsAndMethods)) {
+            BeanManagement.addBean("loadsObjectsAndMethods",new LoadsObjectsAndMethods(packagePath));
+            loadsObjectsAndMethods = (LoadsObjectsAndMethods) BeanManagement.getBean("loadsObjectsAndMethods");
+        }
         loadsObjectsAndMethods.loadsObjectsAndMethods();
     }
 
@@ -43,7 +46,7 @@ public class DistributionController extends HttpServlet {
              keys) {
             parameters.put(key,req.getParameter(key));
         }
-        // 调用方法
+        // 调用方法 并处理结果
         Object obj = MethodCall.methodCall(uri,requestWay,parameters);
         resp.getWriter().println(obj);
     }

@@ -13,9 +13,7 @@ public class MethodCall {
 
     public static Object methodCall(String uri, String requestWay, Map<String, String> parameters) {
         Object result = null;
-        UriAndMethodsMapping uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
-        System.out.println(uriAndMethodsMapping);
-        // 获取资源地址映射的所有对象
+        UriAndMethodsMapping uriAndMethodsMapping = (UriAndMethodsMapping) BeanManagement.getBean("uriAndMethodsMapping");
         Set<MethodExecutionResources> set = uriAndMethodsMapping.getMethodExecutionResources(uri);
         // 遍历
         for (MethodExecutionResources temp :
@@ -51,6 +49,7 @@ public class MethodCall {
                         result = meth.invoke(obj);
                     }
                 } catch (IllegalAccessException | InvocationTargetException ignored) {}
+
             }
         }
         return result;

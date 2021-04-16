@@ -11,13 +11,6 @@ public class UriAndMethodsMapping {
     // 执行方法需要 对象 ，所以变成 资源路径 与 方法、对象、请求方式 的映射关系
     Map<String, Set<MethodExecutionResources>> mapping = new HashMap<>();
 
-    @Override
-    public String toString() {
-        return "UriAndMethodsMapping{" +
-                "mapping=" + mapping +
-                '}';
-    }
-
     public void addMapping(String uri, String requestWay, Method meth, Object obj, String[] parameters) {
         MethodExecutionResources methodExecutionResources = new MethodExecutionResources(obj, meth, requestWay,parameters);
         Set<MethodExecutionResources> set = mapping.get(uri);

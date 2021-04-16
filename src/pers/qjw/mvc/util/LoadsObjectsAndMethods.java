@@ -33,8 +33,8 @@ public class LoadsObjectsAndMethods {
     }
 
     // 获取 资源路径前缀
-    private String getUriPrefix(Class clazz) {
-        RequestMapping requestMapping = (RequestMapping) clazz.getAnnotation(RequestMapping.class);
+    private String getUriPrefix(Class<?> clazz) {
+        RequestMapping requestMapping = clazz.getAnnotation(RequestMapping.class);
         if (Objects.isNull(requestMapping)) {
             // 没有前缀
             return "";
@@ -50,10 +50,10 @@ public class LoadsObjectsAndMethods {
 
     // 通过反射得到文件的 controller类对象 和 处理请求的方法 和 uri
     private void loadObjectsAndMethod(File file) {
-        UriAndMethodsMapping uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
+        UriAndMethodsMapping uriAndMethodsMapping = (UriAndMethodsMapping) BeanManagement.getBean("uriAndMethodsMapping");
         if (Objects.isNull(uriAndMethodsMapping)) {
             BeanManagement.addBean("uriAndMethodsMapping", new UriAndMethodsMapping());
-            uriAndMethodsMapping = BeanManagement.getBean("uriAndMethodsMapping");
+            uriAndMethodsMapping = (UriAndMethodsMapping) BeanManagement.getBean("uriAndMethodsMapping");
         }
         // 检查文件是否已.class为后缀
         if (!checkFile(file)) {
@@ -62,9 +62,9 @@ public class LoadsObjectsAndMethods {
         // 获取类全名
         String classFullName = getClassFullName(file);
         try {
-            Class clazz = Class.forName(classFullName);
+            Class<?> clazz = Class.forName(classFullName);
             // 获取 RestController 类注解
-            RestController restController = (RestController) clazz.getAnnotation(RestController.class);
+            RestController restController = clazz.getAnnotation(RestController.class);
             // 判断是否为 controller 类
             if (!Objects.isNull(restController)) {
                 // 创建类对象
@@ -95,8 +95,13 @@ public class LoadsObjectsAndMethods {
                         }
                     } else {
                         // 处理 ALL 请求方式的方法
-                        requestWay = "All";
-                        uri = uriPrefix + requestMapping.value();
+                        requestWay = "ALL";
+                        String uriBody = requestMapping.value();
+                        if (!Objects.equals("", uriBody) && !uriBody.contains("/")) {
+                            uri = uriPrefix + "/" + uriBody;
+                        } else {
+                            uri = uriPrefix + uriBody;
+                        }
                     }
                     Parameter[] parameters = temp.getParameters();
                     String[] parameterNames;
@@ -125,10 +130,10 @@ public class LoadsObjectsAndMethods {
 
     }
 
-    private Object createObj(Class clazz) {
-        Constructor[] constructors = clazz.getConstructors();
+    private Object createObj(Class<?> clazz) {
+        Constructor<?>[] constructors = clazz.getConstructors();
         Object result = null;
-        for (Constructor constructorTemp :
+        for (Constructor<?> constructorTemp :
                 constructors) {
             Parameter[] parameters = constructorTemp.getParameters();
             Object[] objects = new Object[parameters.length];
